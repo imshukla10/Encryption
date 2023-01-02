@@ -4,7 +4,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const mongoose = require("mongoose");
-const encrypt = require("mongoose-encryption");
+const md5 = require("md5");
 
 const app = express();
 
@@ -23,8 +23,7 @@ const userSchema = new mongoose.Schema({
 });
   
 //Database encryption must be added before creating model of database.
-// const secret = "Thisisourlittlesecret.";
-userSchema.plugin(encrypt,{secret:process.env.SECRET,encryptedFields:["password"]});
+
 
 
 //Database model
@@ -48,7 +47,7 @@ app.post("/register",function(req,res){
     //creating object of new user
     const newUser = new User({
         email:req.body.username,
-        password:req.body.password
+        password:md5(req.body.password)
     });
     //saving newUser object into database
     newUser.save(function(err){
@@ -64,7 +63,7 @@ app.post("/register",function(req,res){
 //login route
 app.post("/login",function(req,res){
     const username = req.body.username;
-    const password = req.body.password;
+    const password = md5(req.body.password);
     User.findOne({email:username},function(err,foundUser){
         if(err){
             console.log(err);
@@ -77,14 +76,6 @@ app.post("/login",function(req,res){
         }
      });
 });
-
-
-
-
-
-
-
-
 
 app.listen(3000,function(){
     console.log("Server is running on port 3000");
